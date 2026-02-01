@@ -11,15 +11,22 @@ collectDefaultMetrics({
 });
 
 const reqResTime = new client.Histogram({
-  name: "  ",
+  name: "http_express_req_res_time_seconds",
   help: "This tell how much time is taken by req and res",
   labelNames: ["method", "route", "code"],
   buckets: [1, 50, 100, 200, 300, 400, 500, 750, 1000, 2000], // in ms
 });
 
+const totalReq = new client.Counter({
+  name: "http_express_total_req_count",
+  help: "Total number of requests",
+  labelNames: ["method", "route", "code"],
+});
+
 const app = express();
 app.use(
   responseTime((req, res, time) => {
+    totalReq.inc()
     const route = req.route?.path || req.originalUrl || 'unknown';
 
     reqResTime
